@@ -46,6 +46,8 @@ SPLUNK_INDEX=oura_data
 ### 4. Install Dependencies
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -54,17 +56,28 @@ pip install -r requirements.txt
 ### Fetch and Send Data to Splunk
 
 ```bash
+cd /Users/nefarooq/oura-splunk-integration
+source venv/bin/activate
 python oura_to_splunk.py
 ```
 
-### Schedule Regular Updates
+### Schedule Regular Updates (Automated Daily Sync)
 
-Use cron (Linux/Mac) or Task Scheduler (Windows) to run the script periodically:
+Run the included script for daily automation:
 
 ```bash
-# Example cron entry for daily execution at 6 AM
-0 6 * * * /path/to/python /path/to/oura_to_splunk.py
+./run_sync.sh
 ```
+
+To set up automatic daily runs, enable Terminal in System Settings → Privacy & Security → Full Disk Access, then:
+
+```bash
+crontab -e
+# Add this line:
+0 6 * * * /Users/nefarooq/oura-splunk-integration/run_sync.sh
+```
+
+Logs are saved to `sync.log` in the project directory.
 
 ## Data Structure
 
@@ -95,7 +108,46 @@ index=oura_data sourcetype="oura:sleep"
 # View readiness trends
 index=oura_data sourcetype="oura:readiness"
 | timechart avg(score) as "Readiness Score"
+
+# Activity summary
+index=oura_data sourcetype="oura:activity"
+| timechart avg(steps) as Steps, avg(active_calories) as Calories
 ```
+
+## Dashboards and Alerts
+
+### Import Dashboard
+
+A pre-built dashboard is included in `splunk_dashboard.xml`. To import:
+
+1. In Splunk, go to **Dashboards** → **Create New Dashboard**
+2. Choose **Source** as the creation method
+3. Copy the contents of `splunk_dashboard.xml`
+4. Paste and save
+
+The dashboard includes:
+- Sleep score trends
+- Readiness score trends
+- Activity summaries
+- Workout tracking
+- Average score statistics
+
+### Set Up Alerts
+
+See `splunk_alerts.md` for pre-configured alert examples:
+- Low readiness score alerts
+- Poor sleep quality alerts
+- Missed sync notifications
+- Activity achievement celebrations
+
+## Files
+
+- `oura_to_splunk.py` - Main integration script
+- `config.py` - Configuration management
+- `run_sync.sh` - Automated sync script
+- `splunk_dashboard.xml` - Pre-built Splunk dashboard
+- `splunk_alerts.md` - Alert configuration guide
+- `splunk_props.conf` - Splunk data parsing configuration
 
 ## License
 

@@ -1,0 +1,136 @@
+<form version="1.1">
+  <label>Oura Ring Health Dashboard</label>
+  <description>Comprehensive view of your Oura Ring health metrics</description>
+
+  <fieldset submitButton="false">
+    <input type="time" token="time_range">
+      <label>Time Range</label>
+      <default>
+        <earliest>-30d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+
+  <row>
+    <panel>
+      <title>Sleep Score Trend</title>
+      <chart>
+        <search>
+          <query>index=oura_data sourcetype="oura:sleep"
+| timechart avg(score) as "Sleep Score"</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.axisTitleX.text">Date</option>
+        <option name="charting.axisTitleY.text">Score</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+
+    <panel>
+      <title>Readiness Score Trend</title>
+      <chart>
+        <search>
+          <query>index=oura_data sourcetype="oura:readiness"
+| timechart avg(score) as "Readiness Score"</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.axisTitleX.text">Date</option>
+        <option name="charting.axisTitleY.text">Score</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Activity Summary</title>
+      <chart>
+        <search>
+          <query>index=oura_data sourcetype="oura:activity"
+| timechart avg(steps) as "Steps" avg(active_calories) as "Active Calories"</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisTitleX.text">Date</option>
+        <option name="charting.axisTitleY.text">Count</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+
+    <panel>
+      <title>Workout Summary</title>
+      <table>
+        <search>
+          <query>index=oura_data sourcetype="oura:workout"
+| dedup day, start_datetime
+| table day, activity, calories, intensity, start_datetime
+| sort -day</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>Average Scores</title>
+      <single>
+        <search>
+          <query>index=oura_data sourcetype="oura:sleep"
+| stats avg(score) as avg_score
+| eval avg_score=round(avg_score,1)</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="underLabel">Average Sleep Score</option>
+        <option name="useColors">1</option>
+        <option name="rangeColors">["0xdc4e41","0xf1813f","0x53a051"]</option>
+        <option name="rangeValues">[50,75]</option>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Average Readiness</title>
+      <single>
+        <search>
+          <query>index=oura_data sourcetype="oura:readiness"
+| stats avg(score) as avg_score
+| eval avg_score=round(avg_score,1)</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="underLabel">Average Readiness Score</option>
+        <option name="useColors">1</option>
+        <option name="rangeColors">["0xdc4e41","0xf1813f","0x53a051"]</option>
+        <option name="rangeValues">[50,75]</option>
+      </single>
+    </panel>
+
+    <panel>
+      <title>Total Workouts</title>
+      <single>
+        <search>
+          <query>index=oura_data sourcetype="oura:workout"
+| stats count as total_workouts</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="underLabel">Total Workouts</option>
+      </single>
+    </panel>
+  </row>
+</form>

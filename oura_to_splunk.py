@@ -109,7 +109,7 @@ class SplunkHEC:
             self.hec_url,
             headers=self.headers,
             json=event,
-            verify=True
+            verify=False
         )
 
         if response.status_code == 200:
