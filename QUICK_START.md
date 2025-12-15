@@ -22,20 +22,22 @@ Your Oura Ring to Splunk integration is fully configured and ready to use!
 5. Paste into Splunk and click **Save**
 6. Name it "Oura Ring Health Dashboard"
 
-### 2. Set Up Daily Automation (1 min)
+### 2. Set Up Daily Automation (30 seconds)
 
-Enable Terminal access:
-1. System Settings → Privacy & Security → Full Disk Access
-2. Add Terminal to the list
-3. Run in terminal:
+Run this one command to set up automatic daily syncing at 6 AM:
+
 ```bash
-crontab -e
-# Press 'i' to insert, then add this line:
-0 6 * * * /Users/nefarooq/oura-splunk-integration/run_sync.sh
-# Press ESC, then type :wq and press Enter
+(crontab -l 2>/dev/null; echo "0 6 * * * /Users/nefarooq/oura-splunk-integration/run_sync.sh") | crontab -
+```
+
+Verify it's set up:
+```bash
+crontab -l
 ```
 
 Your data will now sync automatically every day at 6 AM!
+
+**Note:** If cron doesn't run, you may need to give Terminal Full Disk Access in System Settings → Privacy & Security.
 
 ### 3. Create Alerts (2 min)
 

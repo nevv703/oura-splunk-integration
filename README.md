@@ -63,21 +63,45 @@ python oura_to_splunk.py
 
 ### Schedule Regular Updates (Automated Daily Sync)
 
-Run the included script for daily automation:
+**Option 1: Automated Setup (Recommended)**
+
+The cron job can be added with one command:
 
 ```bash
-./run_sync.sh
+(crontab -l 2>/dev/null; echo "0 6 * * * /Users/nefarooq/oura-splunk-integration/run_sync.sh") | crontab -
 ```
 
-To set up automatic daily runs, enable Terminal in System Settings → Privacy & Security → Full Disk Access, then:
+Verify it was added:
+```bash
+crontab -l
+```
 
+**Option 2: Manual Setup**
+
+1. Open crontab editor:
 ```bash
 crontab -e
-# Add this line:
+```
+
+2. Add this line (press `i` to insert, then `ESC` and `:wq` to save):
+```
 0 6 * * * /Users/nefarooq/oura-splunk-integration/run_sync.sh
 ```
 
-Logs are saved to `sync.log` in the project directory.
+**Manual Sync Anytime:**
+
+```bash
+cd /Users/nefarooq/oura-splunk-integration
+./run_sync.sh
+```
+
+**View Logs:**
+
+```bash
+tail -f sync.log
+```
+
+The script runs daily at 6 AM, fetching the last 7 days of data. Logs are saved to `sync.log` in the project directory.
 
 ## Data Structure
 
@@ -148,6 +172,65 @@ See `splunk_alerts.md` for pre-configured alert examples:
 - `splunk_dashboard.xml` - Pre-built Splunk dashboard
 - `splunk_alerts.md` - Alert configuration guide
 - `splunk_props.conf` - Splunk data parsing configuration
+- `QUICK_START.md` - 5-minute setup guide
+
+## Troubleshooting
+
+### No Data Showing in Splunk
+
+1. **Check if Splunk is running:**
+```bash
+/Applications/Splunk/bin/splunk status
+```
+
+2. **Start Splunk if stopped:**
+```bash
+/Applications/Splunk/bin/splunk start
+```
+
+3. **Verify the sync ran successfully:**
+```bash
+tail -20 sync.log
+```
+
+4. **Run manual sync to test:**
+```bash
+cd /Users/nefarooq/oura-splunk-integration
+./run_sync.sh
+```
+
+### SSL Certificate Errors
+
+The integration is configured to work with local Splunk's self-signed certificate (`verify=False` in the code). For production use, consider:
+- Using HTTP instead of HTTPS for local Splunk
+- Or properly configuring SSL certificates
+
+### Oura Data Not Available
+
+- Oura Ring must be synced with the Oura mobile app first
+- Data can take 1-24 hours to appear in Oura Cloud API
+- Check your Oura app to ensure data is there
+
+### Cron Job Not Running
+
+1. **Verify cron job exists:**
+```bash
+crontab -l
+```
+
+2. **Check Terminal has Full Disk Access:**
+- System Settings → Privacy & Security → Full Disk Access
+- Add Terminal to the list
+
+3. **Test the script manually:**
+```bash
+/Users/nefarooq/oura-splunk-integration/run_sync.sh
+```
+
+## Accessing Your Dashboard
+
+- **Splunk Web Interface:** http://127.0.0.1:8000
+- **GitHub Repository:** https://github.com/nevv703/oura-splunk-integration
 
 ## License
 
